@@ -1,5 +1,16 @@
+# Gym Utils
+```
+>>> Hi Elon it's me - reinforcement learning enthusiast. I want to start building my own agents an...
+<<< Use openai gym and roboschool. Everything is self explainatory
+>>> I already installed it. But Mnih et al. talk about frameskipping and action repeats
+<<< I don't have time for this. I have to go be ironman
+```
+Bootstrapping your (deep) reinforcement learning agent with openai gym doesn't need to be awkward anymore.
+
+## What it is
 Collection of wrappers and utilities for the OpenAI Gym.
 
+# Why
 The intention behind this project is to standardise agent design to enable easier comparisons between agents, and to streamline agent development (and cut down on code re-use). 
 
 This collection will include:
