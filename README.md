@@ -10,7 +10,7 @@ Bootstrapping your (deep) reinforcement learning agent with openai gym doesn't n
 ## What it is
 Collection of wrappers and utilities for the OpenAI Gym.
 
-# Why
+## What's included?
 The intention behind this project is to standardise agent design to enable easier comparisons between agents, and to streamline agent development (and cut down on code re-use). 
 
 This collection will include:
