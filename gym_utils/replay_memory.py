@@ -8,7 +8,8 @@ class ReplayMemory:
     if self.obs_size[0] == None:
         self.observations = [None]*self.memory_size
     else:
-        self.observations = np.empty([self.memory_size]+self.obs_size, dtype = np.float16)
+        self.observations = np.empty(
+            [self.memory_size]+list(self.obs_size), dtype = np.float16)
     self.actions = np.empty(self.memory_size, dtype=np.int16)
     self.returns = np.empty(self.memory_size, dtype = np.float16)
     self.terminal = np.empty(self.memory_size, dtype = np.bool_)
@@ -69,4 +70,4 @@ class ReplayMemory:
       states.append(self._get_state(index, seq_len))
       poststates.append(self._get_state(index+1, seq_len))
 
-    return states, self.actions[indexes], self.returns[indexes], poststates
+    return states, self.actions[indexes], self.returns[indexes], poststates, self.terminal[indexes]

@@ -4,12 +4,12 @@ from .replay_memory import ReplayMemory
 
 class ReplayMemoryWrapper(Wrapper):
     '''
-    Wrapper for OpenAI gym which automatically adds observations to a replay
-    memory which can then be sampled by the agent as needed.
+      Wrapper for OpenAI gym which automatically adds observations to a replay
+      memory which can then be sampled by the agent as needed.
     '''
 
     def __init__(self, env, mem_size=1000):
-        Super(RolloutWrapper, self).__init__(env)
+        super(ReplayMemoryWrapper, self).__init__(env)
         obs_size = env.observation_space.shape
         self.memory = ReplayMemory(mem_size, obs_size)
         self._curr_obs = None
@@ -24,3 +24,6 @@ class ReplayMemoryWrapper(Wrapper):
         observation = self.env.reset(**kwargs)
         self._curr_obs = observation
         return observation
+
+    def get_memory(self):
+        return self.memory
