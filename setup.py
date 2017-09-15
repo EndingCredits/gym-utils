@@ -8,7 +8,7 @@ setup(name='gym_utils',
       author='William Woof',
       author_email='awwoof@hotmail.com',
       license='',
-      packages=['rl_utils'],
+      packages=['gym_utils'],
       install_requires=[],
       zip_safe=False,
 )

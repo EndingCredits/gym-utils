@@ -9,7 +9,7 @@ class ReplayMemoryWrapper(Wrapper):
     '''
 
     def __init__(self, env, mem_size=1000):
-        Super(RolloutWrapper, self).__init__(env)
+        super(ReplayMemoryWrapper, self).__init__(env)
         obs_size = env.observation_space.shape
         self.memory = ReplayMemory(mem_size, obs_size)
         self._curr_obs = None
@@ -24,3 +24,6 @@ class ReplayMemoryWrapper(Wrapper):
         observation = self.env.reset(**kwargs)
         self._curr_obs = observation
         return observation
+
+    def get_memory(self):
+        return self.memory
