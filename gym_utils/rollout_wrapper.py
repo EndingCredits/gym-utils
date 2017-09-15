@@ -2,13 +2,13 @@ from gym import Wrapper
 from .rollout import Rollout
 
 class RolloutWrapper(Wrapper):
-'''
-  Wrapper for OpenAI gym which automatically keeps track of episode history and
-  can be used to automatically calulate things like n-step return.
-'''
+    '''
+     Wrapper for OpenAI gym which automatically keeps track of episode history and
+    can be used to automatically calulate things like n-step return.
+    '''
 
     def __init__(self, env):
-        Super(RolloutWrapper, self).__init__(env)
+        super(RolloutWrapper, self).__init__(env)
         self.episode = Rollout()
         
     def _step(self, action, value=None):
@@ -24,6 +24,9 @@ class RolloutWrapper(Wrapper):
         observation = self.env.reset(**kwargs)
         self.episode.update_state(observation)
         return observation
+        
+    def get_history(self):
+        return self.episode
         
         
 
