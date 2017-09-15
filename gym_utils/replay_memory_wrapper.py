@@ -4,8 +4,8 @@ from .replay_memory import ReplayMemory
 
 class ReplayMemoryWrapper(Wrapper):
     '''
-      Wrapper for OpenAI gym which automatically adds observations to a replay
-      memory which can then be sampled by the agent as needed.
+    Wrapper for OpenAI gym which automatically adds observations to a replay
+    memory which can then be sampled by the agent as needed.
     '''
 
     def __init__(self, env, mem_size=1000):
