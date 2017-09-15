@@ -1,23 +1,28 @@
 class Rollout():
-'''
-Class storing current agent trajectory.
-'''
+  '''
+    Class storing current agent trajectory.
+  '''
 
   def __init__(self):
     self.clear()
+    
+  def __len__(self):
+    return self.current_step
     
   def clear(self):
     self.states = []
     self.actions = []
     self.values = []
     self.rewards = []
+    self.terminals = []
     self.terminal = False
+    self.last_state = None
     
     self.current_step = 0
     
     self._clear_current()
 
-  def _clear_current(self)    
+  def _clear_current(self):    
     self._curr_state = None
     self._curr_value = None
     self._curr_action = None
@@ -42,9 +47,11 @@ Class storing current agent trajectory.
     self.actions.append(self._curr_action)
     self.values.append(self._curr_value)
     self.rewards.append(self._curr_reward)
+    self.terminals.append(self._curr_terminal)
+    
+    self.last_state = self._curr_state
     
     self.terminal = self.terminal or self._curr_terminal
-    
     self._clear_current()
       
   # Helper Utils
