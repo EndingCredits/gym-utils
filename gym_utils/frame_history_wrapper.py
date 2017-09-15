@@ -1,4 +1,5 @@
 from gym import Wrapper
+from gym import spaces
 from collections import deque
 
 
@@ -16,7 +17,7 @@ class FrameHistoryWrapper(Wrapper):
         Wrapper.__init__(self, env)
 
         # Set `hl`, init `frames` deque, override `observation_space`
-        self.hl = hl
+        self._hl = hl
         self.frames = deque([], maxlen=hl)
         os = env.observation_space.shape
         self.observation_space = spaces.Box(low=0, high=255,
@@ -29,10 +30,10 @@ class FrameHistoryWrapper(Wrapper):
 
     def _reset(self):
         obs = self.env.reset()
-        for _ in range(self.k):
+        for _ in range(self._hl):
             self.frames.append(obs)
         return self._get_state()
 
     def _get_state(self):
-        assert len(self.frames) == self.hl
+        assert len(self.frames) == self._hl
         return FrameBuffer(list(self.frames))
