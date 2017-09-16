@@ -21,7 +21,7 @@ class VideoRecorderWrapper(Wrapper):
 
         self.videos = []
         self.enabled = False
-        self.recorder = None
+        self.video_recorder = None
         self._rec_id = None
         self.episode_id = 0
         self.env_semantics_autoreset = env.metadata.get('semantics.autoreset')
@@ -37,10 +37,10 @@ class VideoRecorderWrapper(Wrapper):
         if not self.enabled:
             return done
         if done and self.env_semantics_autoreset:
-            self._reset_recorder()
+            self._reset_video_recorder()
             self.episode_id += 1
         # Record video
-        self.recorder.capture_frame()
+        self.video_recorder.capture_frame()
 
         return done
 
@@ -54,16 +54,16 @@ class VideoRecorderWrapper(Wrapper):
         if not self.enabled:
             return
         # Reset video rectorder
-        self._reset_recorder()
+        self._reset_video_recorder()
 
         # Increment episode_id
         self.episode_id += 1
 
-    def _reset_recorder(self):
-        if self.recorder:
-            self._close_recorder()
+    def _reset_video_recorder(self):
+        if self.video_recorder:
+            self._close_video_recorder()
 
-        self.recorder = VideoRecorder(
+        self.video_recorder = VideoRecorder(
             env=self.env,
             base_path=os.path.join(
                         self.directory,
@@ -72,7 +72,7 @@ class VideoRecorderWrapper(Wrapper):
             metadata={'episode_id': self.episode_id},
             enabled=self._capture_sheduled()
         )
-        self.recorder.capture_frame()
+        self.video_recorder.capture_frame()
 
     def _start(self, directory, should_capture=None, force=False, resume=False, uid=None):
         """Start monitoring.
@@ -130,10 +130,10 @@ class VideoRecorderWrapper(Wrapper):
         if getattr(self, '_videorecorderwrapper', None):
             self.close()
 
-    def _close_recorder(self):
-        self.recorder.close()
-        if self.recorder.functional:
-            self.videos.append((self.recorder.path, self.recorder.metadata_path))
+    def _close_video_recorder(self):
+        self.video_recorder.close()
+        if self.video_recorder.functional:
+            self.videos.append((self.video_recorder.path, self.video_recorder.metadata_path))
 
     def _capture_sheduled(self):
         return self.should_capture(self.episode_id)
@@ -165,8 +165,8 @@ class VideoRecorderWrapper(Wrapper):
         '''Close any open rending windows.'''
         if not self.enabled:
             return
-        if self.recorder is not None:
-            self._close_recorder()
+        if self.video_recorder is not None:
+            self._close_video_recorder()
 
         clsr.unregister(self._rec_id)
         self.enabled = False
