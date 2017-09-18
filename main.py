@@ -7,12 +7,12 @@ from tqdm import tqdm
 
 import gym
 import numpy as np
-import tensorflow as tf
 
 from gym_utils.replay_memory_wrapper import ReplayMemoryWrapper
 from gym_utils.rollout_wrapper import RolloutWrapper
 
 from gym_utils.tensorflow_agents import SimpleQNetAgent
+from gym_utils.tensorflow_agents import mlp
 
 def main(args):
 
@@ -31,6 +31,7 @@ def main(args):
     agent = SimpleQNetAgent(
         env.observation_space.shape,
         env.action_space.n,
+        mlp,
         args.discount,
         args.epsilon,
         args.learning_rate,

@@ -1,10 +1,68 @@
 import numpy as np
 import tensorflow as tf
+import tensorflow.contrib.layers as layers
+
+def Q_network(state, num_outputs, hiddens = [20]):
+    layer_dimensions = \
+        state.get_shape().as_list()[1:] + hiddens + [num_outputs]
+    d = layer_dimensions
+    num_hidden_dim = len(d)-1
+    weights = [None]*num_hidden_dim
+    biases = [None]*num_hidden_dim
+
+    # Create params
+    with tf.variable_scope("params") as vs:
+      for i in range(num_hidden_dim):
+        weights[i] = tf.Variable(
+            tf.random_normal((d[i],d[i+1])), name='weights'+str(i+1))
+        biases[i] = tf.Variable(
+            tf.zeros(d[i+1]), name='biases'+str(i+1))
+    
+    # Build graph
+    fc = state
+    for i in range(num_hidden_dim - 1):
+        fc = tf.nn.relu(tf.matmul(fc, weights[i]) + biases[i]) 
+    Qs = tf.matmul(fc, weights[-1]) + biases[-1]
+
+    # Returns the output Q-values and network params
+    return Qs
+    
+    
+def mlp(inpt, num_outputs, hiddens = [20], activation_fn=tf.nn.relu):
+    out = inpt
+    for hidden in hiddens:
+        out = layers.fully_connected(
+            out, num_outputs=hidden, activation_fn=activation_fn)
+    out = layers.fully_connected(
+        out, num_outputs=num_outputs, activation_fn=None)
+    return out
+    
+def deepmind_CNN(inpt, num_outputs):
+    #initializer = tf.truncated_normal_initializer(0, 0.1, seed=seed)
+    activation_fn = tf.nn.relu
+    
+    inpt = tf.transpose(inpt, perm=[0, 2, 3, 1])
+
+    l1, w['l1_w'], w['l1_b'] = layers.convolution2d(inpt,
+      32, [8, 8], [4, 4], activation_fn)
+    l2, w['l2_w'], w['l2_b'] = layers.convolution2d(l1,
+      64, [4, 4], [2, 2], activation_fn)
+    l3, w['l3_w'], w['l3_b'] = layers.convolution2d(l2, 
+      64, [3, 3], [1, 1], activation_fn)
+
+    shape = l3.get_shape().as_list()
+    l3_flat = tf.reshape(l3, [-1, reduce(lambda x, y: x * y, shape[1:])])
+
+    out = mlp(l3_flat, num_outputs, [128])
+
+    # Returns the network output, parameters
+    return embedding
 
 class SimpleQNetAgent:
     def __init__(self, 
                  obs_size, 
                  num_actions,
+                 model_fn,
                  discount = 0.9,
                  epsilon = 0.1,
                  learning_rate = 0.00025,
@@ -24,10 +82,10 @@ class SimpleQNetAgent:
         self.train_step = 0
         
         # Build Graph
-        self.build_graph()
+        self.build_graph(model_fn)
         
         
-    def build_graph(self):
+    def build_graph(self, model_fn):
         # Set up tensorflow session
         self.session = tf.Session()
         
@@ -38,12 +96,17 @@ class SimpleQNetAgent:
         
         # Build Networks
         with tf.variable_scope('prediction'):
-            self.pred_q, self.pred_weights = \
-                self.Q_network(self.state, self.num_actions)
+            self.pred_q = \
+                model_fn(self.state, self.num_actions)
         with tf.variable_scope('target'):
-            self.target_pred_q, self.target_weights = \
-                self.Q_network(self.state, self.num_actions)
+            self.target_pred_q = \
+                model_fn(self.state, self.num_actions)
                 
+        self.pred_weights = tf.get_collection(
+            tf.GraphKeys.GLOBAL_VARIABLES,scope='prediction')
+        self.target_weights = tf.get_collection(
+            tf.GraphKeys.GLOBAL_VARIABLES,scope='target') 
+            
         # Loss function
         action_one_hot = tf.one_hot(self.action, self.num_actions, 1.0, 0.0)
         q_acted = tf.reduce_sum(self.pred_q * action_one_hot, axis=1)
@@ -53,33 +116,7 @@ class SimpleQNetAgent:
         
         # Initialise variables
         self.session.run(tf.global_variables_initializer())
-     
-
-    def Q_network(self, state, num_outputs, hiddens = [20]):
-        layer_dimensions = \
-            state.get_shape().as_list()[1:] + hiddens + [num_outputs]
-        d = layer_dimensions
-        num_hidden_dim = len(d)-1
-        weights = [None]*num_hidden_dim
-        biases = [None]*num_hidden_dim
     
-        # Create params
-        with tf.variable_scope("params") as vs:
-          for i in range(num_hidden_dim):
-            weights[i] = tf.Variable(
-                tf.random_normal((d[i],d[i+1])), name='weights'+str(i+1))
-            biases[i] = tf.Variable(
-                tf.zeros(d[i+1]), name='biases'+str(i+1))
-        
-        # Build graph
-        fc = state
-        for i in range(num_hidden_dim - 1):
-            fc = tf.nn.relu(tf.matmul(fc, weights[i]) + biases[i]) 
-        Qs = tf.matmul(fc, weights[-1]) + biases[-1]
-
-        # Returns the output Q-values and network params
-        return Qs, weights + biases
-        
         
     def getAction(self, state):
         # Get Q values from network
