@@ -15,7 +15,7 @@ class FrameSkipWrapper(Wrapper):
         done = False
 
         # Step the env `_k` times and return the last obs
-        for _ range(self._k):
+        for _ in range(self._k):
             obs, reward, done, info = self.env.step(action)
             r += reward
             if done:

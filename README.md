@@ -31,3 +31,4 @@ Absolutely. As much as anything this is intended to be a collection of common re
 #### Notes and TODO list:
 * A wrapper to automatically collect env statistics (e.g. episode rewards) would be useful. (It's possible this is already implemented in env monitoring)
 * Need to look at pulling apart the Q agent from the tensorflow part.
+* Need to define set supported observation types and add asserts where they don't work

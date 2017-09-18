@@ -2,6 +2,7 @@ from gym import Wrapper
 from gym import spaces
 from collections import deque
 
+import numpy as np
 
 class FrameHistoryWrapper(Wrapper):
     '''
@@ -12,16 +13,16 @@ class FrameHistoryWrapper(Wrapper):
 
     Credits to openai baselines - the implementation is basically the same
     '''
-    def __init__(self, env, hl):
+    def __init__(self, env, hl=4):
         assert env is not None
-        Wrapper.__init__(self, env)
+        super(FrameHistoryWrapper, self).__init__(env)
 
         # Set `hl`, init `frames` deque, override `observation_space`
         self._hl = hl
         self.frames = deque([], maxlen=hl)
-        os = env.observation_space.shape
-        self.observation_space = spaces.Box(low=0, high=255,
-                                            shape=(os[0], os[1], os[2]*hl))
+        os = list(env.observation_space.shape)
+        os = [hl] + os
+        self.observation_space = spaces.Box(low=0, high=255, shape=tuple(os))
 
     def _step(self, action):
         obs, reward, done, info = self.env.step(action)
@@ -36,4 +37,4 @@ class FrameHistoryWrapper(Wrapper):
 
     def _get_state(self):
         assert len(self.frames) == self._hl
-        return FrameBuffer(list(self.frames))
+        return list(self.frames)

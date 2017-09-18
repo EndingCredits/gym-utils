@@ -3,7 +3,7 @@ import numpy as np
 class ReplayMemory:
   def __init__(self, memory_size, obs_size):
     self.memory_size = memory_size
-    self.obs_size = obs_size
+    self.obs_size = list(obs_size)
 
     if self.obs_size[0] == None:
         self.observations = [None]*self.memory_size
@@ -42,6 +42,11 @@ class ReplayMemory:
         for i in range(seq_len):
           ind = (index-i) % self.count
           state[i] = self.observations[ind]
+        #frames = []
+        #for i in range(seq_len):
+        #  ind = (index-i) % self.count
+        #  frames.append(self.observations[ind])
+        #  state = np.concatenate(frames, axis=2)
     return state
 
   def _uninterrupted(self, start, final):

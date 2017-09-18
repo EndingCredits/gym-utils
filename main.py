@@ -9,29 +9,36 @@ import gym
 import numpy as np
 
 from gym_utils.replay_memory_wrapper import ReplayMemoryWrapper
-from gym_utils.rollout_wrapper import RolloutWrapper
-
 from gym_utils.tensorflow_agents import SimpleQNetAgent
-from gym_utils.tensorflow_agents import mlp
+from gym_utils.tensorflow_models import mlp
 
 def main(args):
 
     # Make Environment
     env = gym.make(args.env)
     
-    env = RolloutWrapper(env)
-    episode = env.get_history()
+    model_fn = mlp
+    
+    if args.atari == True:
+        from gym_utils.image_wrappers import ImgGreyScale, ImgResize, ImgFrameHistoryWrapper
+        from gym_utils.frame_skip_wrapper import FrameSkipWrapper
+        from gym_utils.tensorflow_models import deepmind_CNN
+        env = FrameSkipWrapper(env, 4)
+        env = ImgResize(env)
+        env = ImgGreyScale(env)
+        env = ImgFrameHistoryWrapper(env, 4)
+        model_fn = deepmind_CNN
     
     env = ReplayMemoryWrapper(env)
     memory = env.get_memory()
     
-    env.reset()
+    state = env.reset()
     
     # Set up agent
     agent = SimpleQNetAgent(
         env.observation_space.shape,
         env.action_space.n,
-        mlp,
+        model_fn,
         args.discount,
         args.epsilon,
         args.learning_rate,
@@ -46,9 +53,9 @@ def main(args):
     for step in tqdm(range(args.training_iters), ncols=70):
 
         # Act
-        state = episode.get_state()
+        #state = episode.get_state()
         act = agent.getAction(state)
-        _, reward, terminal, _ = env.step(act)
+        state, reward, terminal, _ = env.step(act)
 
         # Keep track of total episode reward
         ep_r += reward
@@ -89,6 +96,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--env', type=str, default='CartPole-v0',
                        help='Name of Gym environment')
+    parser.add_argument('--atari', type=int, default=0,
+                       help='Automatically wrap env with image wrappers')
 
     parser.add_argument('--training_iters', type=int, default=100000,
                        help='Number of training iterations to run for')
