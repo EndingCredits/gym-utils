@@ -71,4 +71,3 @@ class ReplayMemory:
       poststates.append(self._get_state(index+1, seq_len))
 
     return states, self.actions[indexes], self.returns[indexes], poststates, self.terminal[indexes]
-
