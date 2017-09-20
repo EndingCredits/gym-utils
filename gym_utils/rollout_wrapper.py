@@ -1,6 +1,7 @@
 from gym import Wrapper
 from .rollout import Rollout
 
+
 class RolloutWrapper(Wrapper):
     '''
      Wrapper for OpenAI gym which automatically keeps track of episode history and
@@ -10,7 +11,7 @@ class RolloutWrapper(Wrapper):
     def __init__(self, env):
         super(RolloutWrapper, self).__init__(env)
         self.episode = Rollout()
-        
+
     def _step(self, action, value=None):
         self.episode.update_action(action)
         observation, reward, done, info = self.env.step(action)
@@ -24,9 +25,6 @@ class RolloutWrapper(Wrapper):
         observation = self.env.reset(**kwargs)
         self.episode.update_state(observation)
         return observation
-        
+
     def get_history(self):
         return self.episode
-        
-        
-

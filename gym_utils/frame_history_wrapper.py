@@ -4,6 +4,7 @@ from collections import deque
 
 import numpy as np
 
+
 class FrameHistoryWrapper(Wrapper):
     '''
     Gym wrapper implementing frame history, as published
