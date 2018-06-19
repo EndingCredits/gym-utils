@@ -58,7 +58,7 @@ class ReplayMemory:
 
   def sample(self, batch_size, seq_len=0):
     # sample random indexes
-    indexes = [] ; states = [] ; poststates = []
+    indexes = [] ; prestates = [] ; poststates = []
     watchdog = 0 ; threshold = 100
     while len(indexes) < batch_size:
       while watchdog < threshold:
@@ -72,7 +72,10 @@ class ReplayMemory:
         break
 
       indexes.append(index)
-      states.append(self._get_state(index, seq_len))
+      prestates.append(self._get_state(index, seq_len))
       poststates.append(self._get_state(index+1, seq_len))
 
-    return states, self.actions[indexes], self.returns[indexes], poststates, self.terminal[indexes]
+    indexes = np.array(indexes)
+    return prestates, self.actions[indexes], self.returns[indexes], \
+                poststates, self.terminal[indexes+1]
+                
