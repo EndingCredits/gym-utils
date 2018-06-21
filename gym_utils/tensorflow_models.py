@@ -2,7 +2,7 @@ import tensorflow as tf
 
 def linear(inpt,
            output_size,
-           stddev=0.02,
+           stddev=0.2,
            bias_start=0.0,
            activation_fn=None,
            name='linear'):
@@ -53,7 +53,7 @@ def conv2d(inpt,
 def mlp(inpt, num_outputs, hiddens = [20], activation_fn=tf.nn.relu):
     out = inpt
     for i, hidden in enumerate(hiddens):
-        out = linear(out, num_outputs, activation_fn=activation_fn, name='l_'+str(i))
+        out = linear(out, hidden, activation_fn=activation_fn, name='l_'+str(i))
     out = linear(out, num_outputs, name='out')
     return out
     

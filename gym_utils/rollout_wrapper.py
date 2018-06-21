@@ -11,7 +11,7 @@ class RolloutWrapper(Wrapper):
         super(RolloutWrapper, self).__init__(env)
         self.episode = Rollout()
         
-    def _step(self, action, value=None):
+    def _step(self, action):
         self.episode.update_action(action)
         observation, reward, done, info = self.env.step(action)
         self.episode.update_reward(reward, done)
