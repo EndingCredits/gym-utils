@@ -20,7 +20,7 @@ class Rollout():
     self.actions = []
     self.rewards = []
     self.terminals = []
-    self.other = []
+    self.others = []
     self.terminal = False
     self.last_state = None
     self.current_step = 0
@@ -42,14 +42,14 @@ class Rollout():
     self._curr_sart[REWARD] = reward
     self._curr_sart[TERMINAL] = terminal
     
-  def update_other(self, **kwargs):
-    self._curr_other.update(kwargs)
+  def update_other(self, other):
+    self._curr_other = other
       
   def step(self):
     self.current_step += 1
     
     # Check if any values are missing
-    assert all( self._curr_sart )
+    assert not [ c for c in self._curr_sart if c is None ]
     
     self.last_state = self._curr_sart[STATE]
     self.terminal = self.terminal or self._curr_sart[TERMINAL]
@@ -65,13 +65,24 @@ class Rollout():
       
       
   # Helper Utils
-  def get_state(self, seq_len=1, use_current=True):
-    if seq_len == 1:
+  def get_state(self, seq_len=0, use_current=True, tile=True):
+    if seq_len == 0:
       return self._curr_sart[STATE] if use_current else self.states[-1]
+    elif seq_len == 1:
+      return [ self.get_state(use_current=use_current) ]
     else:
-      assert self.current_step >= seq_len, "Not enough steps in episode"
-      return [entry.state for entry in self.rollout[-(seq_len-1):] ] \
-                + [self._curr_sart[STATE]]
+      if self.current_step >= seq_len:
+          return self.states[-(seq_len-1):] + [self._curr_sart[STATE]]
+      else:
+          assert tile, "Not enough steps in episode"
+          diff = seq_len - self.current_step - 1
+          try:
+              first = self.states[0]
+          except:
+              first = self._curr_sart[STATE]
+          states = [ first ]*diff + self.states \
+                     + [ self._curr_sart[STATE] ]
+          return states
       
   def n_step_return(self):
     pass #Not implemented yet

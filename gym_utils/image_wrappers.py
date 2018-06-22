@@ -14,24 +14,30 @@ class ImgGreyScale(ObservationWrapper):
     def __init__(self, env, keep_dim=False):
         super(ImgGreyScale, self).__init__(env)
         env_shape = list(self.observation_space.shape)
-        env_shape[-1] = 1
+        self.keep_dim = keep_dim
+        if keep_dim:
+            env_shape[-1] = 1
+        else:
+            env_shape = env_shape[:-1]
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=env_shape)
 
     def _observation(self, obs):
-        return ImgGreyScale.process(obs)
+        return ImgGreyScale.process(obs, self.keep_dim)
         
     @staticmethod
-    def process(input_image):
+    def process(input_image, keep_dim=False):
         greys = np.dot(input_image[...,:3], [0.299, 0.587, 0.114])
-        return np.expand_dims(greys, 2)
-        
+        if keep_dim:
+            return np.expand_dims(greys, 2)
+        else:
+            return greys
         
 class ImgResize(ObservationWrapper):
     def __init__(self, env=None, x=84, y=84):
         super(ImgResize, self).__init__(env)
         self.x = x ; self.y = y
         env_shape = list(self.observation_space.shape)
-        # N.B: Need to sort out for differetn obs shapes
+        # N.B: Need to sort out for different obs shapes
         env_shape[0] = self.x ; env_shape[1] = self.y
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=env_shape)
 
@@ -43,6 +49,26 @@ class ImgResize(ObservationWrapper):
         return scipy.misc.imresize(input_image, (y, x))
 
 
+class ImgCrop(ObservationWrapper):
+    def __init__(self, env=None, x=84, y=84):
+        super(ImgCrop, self).__init__(env)
+        self.x = x ; self.y = y
+        env_shape = list(self.observation_space.shape)
+        self.old_x = x ; self.old_y = y
+        self.side_crop = (self.old_x - self.x) // 2
+        self.top_crop = (self.old_y - self.y) // 2
+        env_shape[0] = self.x ; env_shape[1] = self.y
+        self.observation_space = gym.spaces.Box(low=0, high=255, shape=env_shape)
+
+    def _observation(self, obs):
+        return ImgCrop.process(obs, self.side_crop, self.old_x - self.side_crop,
+                                    self.top_crop, self.old_y - self.top_crop)
+        
+    @staticmethod
+    def process(input_image, x_1, x_2, y_1, y_2):
+        return input_image[ x_1:x_2, y_1:y_2  ]
+        
+        
 class ImgFrameHistoryWrapper(FrameHistoryWrapper):
     '''
     Same as vanilla history wrapper but instead of giving frames as a list,
