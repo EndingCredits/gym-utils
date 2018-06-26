@@ -65,24 +65,36 @@ class Rollout():
       
       
   # Helper Utils
-  def get_state(self, seq_len=0, use_current=True, tile=True):
+  def get_state(self, seq_len=0, t=-1, tile=True):
+    if self._curr_sart[STATE] is not None:
+      t = t % (self.current_step + 1)
+    
     if seq_len == 0:
-      return self._curr_sart[STATE] if use_current else self.states[-1]
+      return self._get_state(t=t)
     elif seq_len == 1:
-      return [ self.get_state(use_current=use_current) ]
+      return [ self._get_state(t=t) ]
     else:
-      if self.current_step >= seq_len:
-          return self.states[-(seq_len-1):] + [self._curr_sart[STATE]]
+      if t >= seq_len:
+          return [ self._get_state(i+1) for i in range(t-seq_len, t) ]
       else:
           assert tile, "Not enough steps in episode"
-          diff = seq_len - self.current_step - 1
+          diff = seq_len# - t -1
           try:
               first = self.states[0]
           except:
               first = self._curr_sart[STATE]
-          states = [ first ]*diff + self.states \
-                     + [ self._curr_sart[STATE] ]
+          states = [ first ]*diff + [ self._get_state(i) for i in range(seq_len-diff) ]
           return states
+          
+  def _get_state(self, t=-1):
+    if self._curr_sart[STATE] is not None:
+      t = t % (self.current_step + 1)
+      if t == self.current_step:
+        return self._curr_sart[STATE]
+      else:
+        return self.states[t]
+    else:
+      return self.states[t]
       
       
   def n_step_return(self, n_steps, discount=1, value_index=None):
