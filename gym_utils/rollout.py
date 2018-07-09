@@ -96,24 +96,27 @@ class Rollout():
     else:
       return self.states[t]
       
-      
-  def n_step_return(self, n_steps, discount=1, value_index=None):
+
+    
+  def n_step_return(self, n_steps, discount=1, gamma=1, value_index=None):
     '''
-    Calculates the n-step return based on value predictions saved in self.others
+    Calculates the n-step return based on value predictions saved in
+    self.others.
     
     n_steps is the number of steps before truncation
     discount is the discount factor
     value_index is the index in the list of others where the values are stored,
-    leave none is each others is a raw float value corresponding to the value
-    '''
+    leave none if others is just a raw float value corresponding to the value.
     
+    N.B: Only works for completed trajectory
+    '''
+
     if value_index is None:
         values = self.others
     else:
         values = [ o[value_index] for o in self.others ]
 
     returns = []
-    
     for t in range(len(self)):
       if self.current_step - t > n_steps:
         #Get truncated return
@@ -122,14 +125,38 @@ class Rollout():
       else:
         start_t = self.current_step
         R_t = 0
-          
-      for i in range(start_t-1, t, -1):
+        
+      for i in reversed(range(t, start_t)):
         R_t = R_t * discount + self.rewards[i]
       returns.append(R_t)
     return returns
 
 
-  
-      
-      
+  def gamma_return(self, discount=1, gamma=1, value_index=None):
+    '''
+    Calculates the gamma return based on the PPO paper from value predictions
+    saved in self.others.
+    
+    discount is the discount factor
+    gamma is gamma
+    value_index is the index in the list of others where the values are stored,
+    leave none if others is just a raw float value corresponding to the value.
+    
+    N.B: Only works for completed trjectory
+    '''
 
+    if value_index is None:
+        values = self.others
+    else:
+        values = [ o[value_index] for o in self.others ]
+
+    # From OpenAI PPO baselines code
+    returns = [ 0.0 ] * self.current_step
+    lastgaelam = 0.0
+    nextvalues = 0.0 # start with 0 for end of episode
+    for t in reversed(range(self.current_step)):  
+        delta = self.rewards[t] + gamma * nextvalues - values[t]
+        lastgaelam = delta + gamma * discount * lastgaelam
+        returns[t] = lastgaelam + values[t]
+        nextvalues = values[t]
+    return returns
