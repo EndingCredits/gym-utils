@@ -1,5 +1,5 @@
 from gym import Wrapper, error, version
-from gym.monitoring.video_recorder import VideoRecorder
+from .third_party.video_recorder import VideoRecorder
 from gym.utils import closer
 import os
 import logging
